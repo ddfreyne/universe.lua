@@ -2,11 +2,11 @@
 
 local config = {
     -- how much bigger/smaller the bucket should be than the default
-    bucketSizeFactor = 1 / 40.0,
+    bucketSizeFactor = 1 / 10.0,
 
     -- how many surrounding buckets to consider when distributing
     -- smaller == faster but less accurate
-    bucketSearchDistance = 8,
+    bucketSearchDistance = 1,
 
     -- how much the forces should be made stronger than the default
     -- larger == faster but less accurate
@@ -20,7 +20,7 @@ local width   = 800
 local height  = 600
 
 -- how many points per pixel you want
-local density = 0.002
+local density = 0.001
 
 --------------------------------------------------------------------------------
 
@@ -125,6 +125,9 @@ function forceVector(p1, p2)
 end
 
 function distributePoints(_, width, height, density)
+    local bucketSize = 1 / density * config.bucketSizeFactor
+    local maxDistance = config.bucketSearchDistance * bucketSize
+
     -- generate force vectors
     local forceVectors = {}
     for bx, subBuckets in pairs(buckets) do
@@ -137,7 +140,7 @@ function distributePoints(_, width, height, density)
                             for npi, npoint in pairs(buckets[nbx][nby]) do
                                 local d = distance(point, npoint)
 
-                                if d > 0.01 then
+                                if d > 0.01 and d < maxDistance then
                                     local f = forceVector(point, npoint)
                                     local fv = forceVectors[point]
                                     fv.x = fv.x + f.x
